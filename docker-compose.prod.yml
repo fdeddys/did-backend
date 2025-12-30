@@ -1,0 +1,29 @@
+# ===================================
+# PRODUCTION ENVIRONMENT OVERRIDES
+# ===================================
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up
+# Or use npm script: npm run docker:prod
+# Note: In production, prefer Kubernetes over Docker Compose
+# ===================================
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.prod  # Production optimized Dockerfile
+    container_name: backend-app-prod
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.prod
+    restart: always
+    environment:
+      # Override if needed
+      - NODE_ENV=production
+    # Remove volume mounts for production (no hot reload)
+    volumes: []
+    # No postgres service - connect to managed database (RDS/Cloud SQL)
+    # Database config is in .env.prod
+
+# Note: No PostgreSQL service in production
+# Production uses managed database (AWS RDS, Google Cloud SQL, etc.)

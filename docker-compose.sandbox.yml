@@ -1,0 +1,23 @@
+# ===================================
+# SANDBOX ENVIRONMENT OVERRIDES
+# ===================================
+# Usage: docker compose -f docker-compose.yml -f docker-compose.sandbox.yml up
+# Or use npm script: npm run docker:sandbox
+# ===================================
+
+services:
+  app:
+    container_name: backend-app-sandbox
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.sandbox
+    restart: always
+    environment:
+      # Override if needed
+      - NODE_ENV=sandbox
+    # No postgres service - connect to external database
+    # Database config is in .env.sandbox
+
+# Note: No PostgreSQL service in sandbox
+# Sandbox connects to external managed database

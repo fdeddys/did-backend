@@ -1,0 +1,30 @@
+# ===================================
+# BASE DOCKER COMPOSE CONFIGURATION
+# ===================================
+# This file contains SHARED configuration for all environments
+# Use with environment-specific overrides:
+# - docker-compose.dev.yml (development)
+# - docker-compose.sandbox.yml (sandbox)
+# - docker-compose.prod.yml (production)
+# ===================================
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
+    volumes:
+      - ./src:/app/src
+      - ./package.json:/app/package.json
+      - /app/node_modules
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data_dev:
+  postgres_data_sandbox:
+  postgres_data_prod:

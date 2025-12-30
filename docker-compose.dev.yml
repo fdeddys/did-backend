@@ -1,0 +1,107 @@
+# ===================================
+# DEVELOPMENT ENVIRONMENT OVERRIDES
+# ===================================
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+# Or use npm script: npm run docker:dev
+# ===================================
+
+services:
+  app:
+    container_name: backend-app-dev
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=local
+
+  # PostgreSQL Database (for development only)
+  postgres:
+    image: postgres:14-alpine
+    container_name: backend-postgres-dev
+    ports:
+      - "5433:5432" 
+    env_file:
+      - .env.dev
+    environment:
+      POSTGRES_DB: db_distributor
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data_dev:
+
+
+
+# version: '3.8'
+
+# services:
+#   app:
+#     build:
+#       context: .
+#       dockerfile: docker/Dockerfile.dev
+#     container_name: backend-app
+#     ports:
+#       - "3000:3000"
+#     volumes:
+#       - ./src:/app/src
+#       - ./package.json:/app/package.json
+#       - /app/node_modules
+#     environment:
+#       - NODE_ENV=local
+#       - DB_HOST=postgres
+#       - DB_PORT=5432
+#       - DB_USERNAME=postgres
+#       - DB_PASSWORD=123
+#       - DB_DATABASE=db_distributor
+#       - JWT_SECRET=local-dev-secret-123
+#       - JWT_REFRESH_SECRET=local-refresh-secret-456
+#       - JWT_EXPIRES_IN=15m
+#       - JWT_REFRESH_EXPIRES_IN=7d
+#     depends_on:
+#       postgres:
+#         condition: service_healthy
+#     networks:
+#       - app-network
+
+#   # PostgreSQL Database
+#   postgres:
+#     image: postgres:14-alpine
+#     container_name: postgres-cb
+#     ports:
+#       - "5433:5432"
+#     environment:
+#       POSTGRES_DB: db_distributor
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: 123
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U postgres"]
+#       interval: 5s
+#       timeout: 5s
+#       retries: 5
+#     networks:
+#       - app-network
+
+# networks:
+#   app-network:
+#     driver: bridge
+
+# volumes:
+#   postgres_data:
+
