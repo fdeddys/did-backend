@@ -6,6 +6,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { getDatabaseConfig } from './config/database.config';
 import { AuthModule } from './auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -20,9 +23,14 @@ import { AuthModule } from './auth/auth.module';
     }),
     UsersModule, 
     ProductsModule, 
-    CustomersModule, AuthModule
+    CustomersModule, 
+    AuthModule,
+    RedisModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [{
+    provide: APP_GUARD,
+    useClass: JwtAuthGuard
+  }],
 })
 export class AppModule {}
