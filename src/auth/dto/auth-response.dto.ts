@@ -1,4 +1,4 @@
-import { Permission } from "../../roles/permission.entity";
+import { Permission } from "../../permission/entities/permission.entity";
 
 export class AuthResponseDto {
     access_token: string;
@@ -9,6 +9,9 @@ export class AuthResponseDto {
         name: string;
     };
     role: string;
-    permission: Record<string, string>[]
+    permission: {
+        name: string;
+        slug: string;
+    }[];
 
 }

@@ -1,6 +1,6 @@
 import { BaseEntity } from "../common/base.entity";
 import { Column, Entity, JoinTable, ManyToMany, OneToMany } from "typeorm";
-import { Permission } from "./permission.entity";
+import { Permission } from "../permission/entities/permission.entity";
 import { User } from "../users/entities/user.entity";
 
 

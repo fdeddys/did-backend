@@ -14,8 +14,8 @@ export class UsersService {
     constructor(
         @InjectRepository(User) 
         private userRepository: Repository<User>,
-        @InjectRepository(Role)
-        private roleRepository: Repository<Role>,
+        // @InjectRepository(Role)
+        // private roleRepository: Repository<Role>,
         private redisService: RedisService,
     ){}
 

@@ -9,7 +9,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
 import { Role } from '../roles/role.entity';
-import { Permission } from '../roles/permission.entity';
+import { Permission } from '../permission/entities/permission.entity';
 import { SeedService } from 'src/auth/seed.service';
 // import { RedisModule } from 'src/redis/redis.module';
 import { PermissionGuard } from './guards/permissions.guard';

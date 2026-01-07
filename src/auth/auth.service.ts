@@ -54,10 +54,11 @@ export class AuthService {
         );
 
         const perms = user.role.permissions.map(p => p.slug)
-        await this.redis.set(`user_perms:${user.id}`, JSON.stringify(perms), 'EX', 86400);
+        await this.redis.set(`user_perms:${user.id}`, JSON.stringify(perms), 'EX', ttlRefresh);
 
         const permissionArray = user.role.permissions.map(perm => ({
-            [perm.name]: perm.slug
+            name : perm.name,
+            slug: perm.slug
         }));
 
         return {
