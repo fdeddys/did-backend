@@ -9,9 +9,15 @@ export class AuthResponseDto {
         name: string;
     };
     role: string;
-    permission: {
-        name: string;
-        slug: string;
-    }[];
+    // permission: {
+    //     name: string;
+    //     slug: string;
+    // }[];
+    permission: PermissionItem[]
 
+}
+
+interface PermissionItem {
+    name: string;
+    slug: string;
 }

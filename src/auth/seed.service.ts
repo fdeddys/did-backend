@@ -47,9 +47,40 @@ export class SeedService {
             module: 'Finance',
         });
 
+        const p6 = await this.permissionRepo.save({
+            name: 'Role',
+            slug: 'role.create',
+            module: 'Role',
+        });
+
+        const p7 = await this.permissionRepo.save({
+            name: 'View Role',
+            slug: 'role.view',
+            module: 'Role',
+        });
+
+        const p8 = await this.permissionRepo.save({
+            name: 'Update Role',
+            slug: 'role.update',
+            module: 'Role',
+        });
+
+        const p9 = await this.permissionRepo.save({
+            name: 'Create Permission',
+            slug: 'permission.create',
+            module: 'Permission',
+        });
+
+        const p10 = await this.permissionRepo.save({
+            name: 'View Permission',
+            slug: 'permission.view',
+            module: 'Permission',
+        });
+
+
         const superAdminRole = await this.roleRepo.save({
             name:'SUPERADMIN',
-            permissions: [p1, p2, p3, p4, p5]
+            permissions: [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10]
         });
 
         const hashedPassword = await bcrypt.hash('admin123', 10);

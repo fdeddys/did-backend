@@ -6,6 +6,12 @@ import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { Redis } from 'ioredis';
+import { Permission } from 'src/permission/entities/permission.entity';
+
+export interface PermissionItem {
+    name: string;
+    slug: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -56,10 +62,14 @@ export class AuthService {
         const perms = user.role.permissions.map(p => p.slug)
         await this.redis.set(`user_perms:${user.id}`, JSON.stringify(perms), 'EX', ttlRefresh);
 
-        const permissionArray = user.role.permissions.map(perm => ({
-            name : perm.name,
-            slug: perm.slug
-        }));
+        // semua view
+        // const permissionArray = user.role.permissions.map(perm => ({
+        //     name : perm.name,
+        //     slug: perm.slug
+        // }));
+        const permissionArray = this.constructPermission(
+            user.role.permissions
+        );
 
         return {
             access_token,
@@ -72,6 +82,44 @@ export class AuthService {
             role: user.role.name,
             permission: permissionArray
         }
+    }
+
+    constructPermission(permissions: Permission[]) {
+
+        const accessibleModules : PermissionItem[] = [];
+
+        const slugsAdd = new Set<string>();
+        console.log('Iteater permission')
+        permissions.forEach(p=> {
+            console.log('Permission : ', p.name)
+            let permissionName = '';
+            let permissionSlug = '';
+            if (p.slug.endsWith('.view')) {
+                permissionName = p.name;
+                permissionSlug = p.slug;
+            } else { 
+                if (p.slug.endsWith('.*'))  {
+                    const moduleName = p.slug.split('.')[0]
+                    permissionSlug = `${moduleName}.view`;
+                    permissionName  = `View ${moduleName}`;
+                } 
+                if (p.slug==='*')  {
+                    const moduleName = p.slug.split('.')[0]
+                    permissionSlug = `${moduleName}.view`;
+                    permissionName  = `View ${moduleName}`;
+                } 
+            }
+            const hasSlug = slugsAdd.has(permissionSlug)
+            if (!hasSlug && permissionSlug !== '') {
+                accessibleModules.push({
+                    name: permissionName,
+                    slug: permissionSlug
+                })
+                slugsAdd.add(permissionSlug)
+            }
+        })
+
+        return accessibleModules;
     }
 
 
@@ -152,8 +200,12 @@ export class AuthService {
 
     async logout(userId: string) {
 
-        const redisKey = `refresh_token:${userId}`;        
-        await this.redis.del(redisKey);
+        const refreshTokenKey = `refresh_token:${userId}`;     
+        const permsKey = `user_perms:${userId}`;   
+        await Promise.all([
+            this.redis.del(refreshTokenKey),
+            this.redis.del(permsKey)
+        ]);
       
         return {
           statusCode: 200,

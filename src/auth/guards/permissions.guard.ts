@@ -35,7 +35,21 @@ export class PermissionGuard implements CanActivate {
         console.log('From Redis:', userPermissions);
         console.log('Type of userPermissions:', typeof userPermissions);
 
-        const isAllowed = userPermissions.includes(requiredPermission);
+        // console.log('ALL PERMISSION')
+        if (userPermissions == '*.*')  {
+            console.log('ALL permission *.*')
+            return true;
+        }
+        // const isAllowed = userPermissions.includes(requiredPermission);
+        const requiredPrefix = requiredPermission.split('.')[0];
+        const isAllowed = userPermissions.some(permission => {
+            if (permission === requiredPermission) return true;
+
+            if (permission.endsWith('.*')) {
+                const userPermissionPrefix = permission.split('.')[0];
+                return requiredPrefix === userPermissionPrefix;
+            }
+        })
         return isAllowed;
     }
 

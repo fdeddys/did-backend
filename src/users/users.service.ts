@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Role } from '../roles/role.entity';
 import { RedisService } from 'src/redis/redis.service';
+import { RoleService } from 'src/roles/roles.service';
 
 @Injectable()
 export class UsersService {
@@ -16,6 +17,7 @@ export class UsersService {
         private userRepository: Repository<User>,
         // @InjectRepository(Role)
         // private roleRepository: Repository<Role>,
+        private roleService: RoleService,
         private redisService: RedisService,
     ){}
 
@@ -23,9 +25,10 @@ export class UsersService {
 
         const { password, roleId, ...userData } = createUserDto;
 
-        const role = await this.roleRepository.findOne({
-          where: { id: roleId}
-        });
+        // const role = await this.roleRepository.findOne({
+        //   where: { id: roleId}
+        // });
+        const role = await this.roleService.findById(roleId);
 
         if (!role) {
             throw new NotFoundException('ROle ID tidak ditemukan ')
@@ -134,11 +137,12 @@ export class UsersService {
 
         // validasi role
         if (roleId && roleId !== user.role?.id) {
-            const newRole = await this.roleRepository.findOne({
-                where : {
-                    id: roleId
-                } 
-            })
+            // const newRole = await this.roleRepository.findOne({
+            //     where : {
+            //         id: roleId
+            //     } 
+            // })
+            const newRole = await this.roleService.findById(roleId);
             if (!newRole) {
                 throw new NotFoundException(`Role with ID ${roleId} not found`)
             }
