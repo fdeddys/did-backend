@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { PermissionsService } from "./permission.service";
-import { RequirePermission } from "src/auth/decorators/permissions.decorator";
+import { RequirePermission } from "../auth/decorators/permissions.decorator";
 import { CreatePermissionDto } from "./dto/create-permisson.dto";
-import { PermissionGuard } from "src/auth/guards/permissions.guard";
+import { PermissionGuard } from "../auth/guards/permissions.guard";
 
 
 @Controller("permissions")

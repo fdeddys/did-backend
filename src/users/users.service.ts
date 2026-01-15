@@ -6,8 +6,8 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Role } from '../roles/role.entity';
-import { RedisService } from 'src/redis/redis.service';
-import { RoleService } from 'src/roles/roles.service';
+import { RedisService } from '../redis/redis.service';
+import { RoleService } from '../roles/roles.service';
 
 @Injectable()
 export class UsersService {

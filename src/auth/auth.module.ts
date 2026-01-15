@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { UsersModule } from 'src/users/users.module';
+import { UsersModule } from '../users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -10,8 +10,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
 import { Role } from '../roles/role.entity';
 import { Permission } from '../permission/entities/permission.entity';
-import { SeedService } from 'src/auth/seed.service';
-// import { RedisModule } from 'src/redis/redis.module';
+import { SeedService } from '../auth/seed.service';
 import { PermissionGuard } from './guards/permissions.guard';
 
 @Module({

@@ -1,12 +1,12 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { Redis } from 'ioredis';
-import { Permission } from 'src/permission/entities/permission.entity';
+import { Permission } from '../permission/entities/permission.entity';
 
 export interface PermissionItem {
     name: string;

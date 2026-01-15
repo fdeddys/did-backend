@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { RedisService } from "src/redis/redis.service";
+import { RedisService } from "../../redis/redis.service";
 import { PERMISSION_KEY } from "../decorators/permissions.decorator";
 
 
