@@ -1,6 +1,6 @@
 import { BaseEntity } from "../../common/base.entity";
 import { Column, Entity, OneToMany } from "typeorm";
-import { UtilDtl } from "./util-dtl.entities";
+import { UtilDtl } from "./util-dtl.entity";
 
 
 @Entity('util_hdr')

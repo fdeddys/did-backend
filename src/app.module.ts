@@ -10,6 +10,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RedisModule } from './redis/redis.module';
 import { RoleModule } from './roles/roles.module';
+import { UtilityModule } from './utility/utility.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { RoleModule } from './roles/roles.module';
     AuthModule,
     RedisModule,
     RoleModule,
+    UtilityModule,
   ],
   controllers: [],
   providers: [{

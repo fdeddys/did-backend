@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { UtilHdr } from "./entities/util-hdr.entities";
+import { UtilHdr } from "./entities/util-hdr.entity";
 import { Repository } from "typeorm";
-import { UtilDtl } from "./entities/util-dtl.entities";
+import { UtilDtl } from "./entities/util-dtl.entity";
 
 
 @Injectable()
@@ -15,7 +15,7 @@ export class UtilityService {
         private utilDtlRepository: Repository<UtilDtl>
     ){}
 
-    async findDetailsByHdt(hdrName: string) {
+    async findDetailsByHdr(hdrName: string) {
         return await this.utilDtlRepository.find({
             where: {
                 hdr: {

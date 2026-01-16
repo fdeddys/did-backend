@@ -1,7 +1,7 @@
 import { BaseEntity } from "../../common/base.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Product } from "./product.entity";
-import { UtilDtl } from "../../utility/entities/util-dtl.entities";
+import { UtilDtl } from "../../utility/entities/util-dtl.entity";
 
 
 @Entity("product_items")
@@ -19,10 +19,10 @@ export class ProductItem extends BaseEntity {
     @JoinColumn({name: 'uom_id'})
     uom: UtilDtl;
 
-    @Column({ type: 'number'})
+    @Column({ type: 'numeric'})
     price: number;
 
-    @Column({ type: 'number'})
+    @Column({ type: 'integer'})
     stock: number;
 
 }
