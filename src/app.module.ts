@@ -16,25 +16,28 @@ import { UtilityModule } from './utility/utility.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env'
+      envFilePath: '.env',
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => getDatabaseConfig(configService),
+      useFactory: (configService: ConfigService) =>
+        getDatabaseConfig(configService),
       inject: [ConfigService],
     }),
-    UsersModule, 
-    ProductsModule, 
-    CustomersModule, 
+    UsersModule,
+    ProductsModule,
+    CustomersModule,
     AuthModule,
     RedisModule,
     RoleModule,
     UtilityModule,
   ],
   controllers: [],
-  providers: [{
-    provide: APP_GUARD,
-    useClass: JwtAuthGuard
-  }],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
