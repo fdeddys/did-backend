@@ -1,17 +1,15 @@
-import { IsNotEmpty, IsString } from "class-validator";
-
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreatePermissionDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
 
-    @IsString()
-    @IsNotEmpty()
-    name: string; 
+  @IsString()
+  @IsNotEmpty()
+  slug: string;
 
-    @IsString()
-    @IsNotEmpty()
-    slug: string;  
-
-    @IsString()
-    @IsNotEmpty()
-    module: string;  
+  @IsString()
+  @IsNotEmpty()
+  module: string;
 }

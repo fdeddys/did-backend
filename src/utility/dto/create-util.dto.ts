@@ -1,8 +1,8 @@
 export class CreateHeaderDto {
-    name: string;
+  name: string;
 }
 
 export class CreateDetailDto {
-    hdrId: number;
-    name: string;
+  hdrId: number;
+  name: string;
 }

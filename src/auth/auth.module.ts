@@ -16,15 +16,17 @@ import { PermissionGuard } from './guards/permissions.guard';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Role, Permission]),
-    UsersModule, 
+    UsersModule,
     PassportModule,
     // RedisModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService): JwtModuleOptions => ({
-        secret: configService.get<string>('JWT_SECRET') || 'fallback-secret-key',
+        secret:
+          configService.get<string>('JWT_SECRET') || 'fallback-secret-key',
         signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRES_IN') || '15m' as any,
+          expiresIn:
+            configService.get<string>('JWT_EXPIRES_IN') || ('15m' as any),
         },
       }),
       inject: [ConfigService],

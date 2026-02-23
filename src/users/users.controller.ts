@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -13,11 +23,10 @@ export class UsersController {
   @UseGuards(PermissionGuard)
   @RequirePermission('user.create')
   create(@Body() createUserDto: CreateUserDto, @Req() req: any) {
-
-    const user = req.user; 
+    const user = req.user;
     console.log('User ID dari JWT:', user.id);
     console.log('Email dari JWT:', user.email);
-    
+
     return this.usersService.create(createUserDto);
   }
 

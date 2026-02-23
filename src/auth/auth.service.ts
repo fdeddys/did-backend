@@ -9,208 +9,196 @@ import { Redis } from 'ioredis';
 import { Permission } from '../permission/entities/permission.entity';
 
 export interface PermissionItem {
-    name: string;
-    slug: string;
+  name: string;
+  slug: string;
 }
 
 @Injectable()
 export class AuthService {
+  constructor(
+    private userService: UsersService,
+    private jwtService: JwtService,
+    private configService: ConfigService,
+    @Inject('REDIS_CLIENT') private readonly redis: Redis,
+  ) {}
 
-    constructor(
-        private userService: UsersService,
-        private jwtService: JwtService,
-        private configService: ConfigService,
-        @Inject('REDIS_CLIENT') private readonly redis: Redis 
-    ){}
+  async login(loginDto: LoginDto): Promise<AuthResponseDto> {
+    // find by email
+    const user = await this.userService.findByEmail(loginDto.email);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credential');
+    }
+    const isPasswordValid = await bcrypt.compare(
+      loginDto.password,
+      user.password,
+    );
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credential');
+    }
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role.name,
+      id: user.id,
+    };
 
-    async login(loginDto: LoginDto): Promise<AuthResponseDto>{
+    const expiredKeyToken = this.configService.get<string>('JWT_EXPIRES_IN');
+    const ttlToken = Number(expiredKeyToken);
+    const expiredKeyRefresh = this.configService.get<string>(
+      'JWT_REFRESH_EXPIRES_IN',
+    );
+    const ttlRefresh = Number(expiredKeyRefresh);
 
-        // find by email
-        const user = await this.userService.findByEmail(loginDto.email);
-        if (!user) {
-            throw new UnauthorizedException('Invalid credential');
+    const access_token = this.generateToken(payload, ttlToken);
+    const refresh_token = this.generateRefreshToken(payload, ttlRefresh);
+
+    const redisKey = `refresh_token:${payload.sub}`;
+
+    await this.redis.set(redisKey, refresh_token, 'EX', ttlRefresh);
+
+    const perms = user.role.permissions.map((p) => p.slug);
+    await this.redis.set(
+      `user_perms:${user.id}`,
+      JSON.stringify(perms),
+      'EX',
+      ttlRefresh,
+    );
+
+    // semua view
+    // const permissionArray = user.role.permissions.map(perm => ({
+    //     name : perm.name,
+    //     slug: perm.slug
+    // }));
+    const permissionArray = this.constructPermission(user.role.permissions);
+
+    return {
+      access_token,
+      refresh_token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
+      role: user.role.name,
+      permission: permissionArray,
+    };
+  }
+
+  constructPermission(permissions: Permission[]) {
+    const accessibleModules: PermissionItem[] = [];
+
+    const slugsAdd = new Set<string>();
+    console.log('Iteater permission');
+    permissions.forEach((p) => {
+      console.log('Permission : ', p.name);
+      let permissionName = '';
+      let permissionSlug = '';
+      if (p.slug.endsWith('.view')) {
+        permissionName = p.name;
+        permissionSlug = p.slug;
+      } else {
+        if (p.slug.endsWith('.*')) {
+          const moduleName = p.slug.split('.')[0];
+          permissionSlug = `${moduleName}.view`;
+          permissionName = `View ${moduleName}`;
         }
-        const isPasswordValid = await bcrypt.compare(
-            loginDto.password,
-            user.password
-        )
-        if (!isPasswordValid) {
-            throw new UnauthorizedException('Invalid credential')
+        if (p.slug === '*') {
+          const moduleName = p.slug.split('.')[0];
+          permissionSlug = `${moduleName}.view`;
+          permissionName = `View ${moduleName}`;
         }
-        const payload = {
-            sub : user.id,
-            email : user.email,
-            role: user.role.name,
-            id: user.id
-        }
+      }
+      const hasSlug = slugsAdd.has(permissionSlug);
+      if (!hasSlug && permissionSlug !== '') {
+        accessibleModules.push({
+          name: permissionName,
+          slug: permissionSlug,
+        });
+        slugsAdd.add(permissionSlug);
+      }
+    });
 
-        const expiredKeyToken = this.configService.get<string>('JWT_EXPIRES_IN');
-        const ttlToken = Number(expiredKeyToken);
-        const expiredKeyRefresh = this.configService.get<string>('JWT_REFRESH_EXPIRES_IN');
-        const ttlRefresh = Number(expiredKeyRefresh);
+    return accessibleModules;
+  }
 
-        const access_token = this.generateToken(payload, ttlToken);
-        //this.jwtService.sign(payload);
-        const refresh_token = this.generateRefreshToken(payload, ttlRefresh);
+  generateToken(payload: any, ttl: number): string {
+    payload.type = 'access';
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('JWT_SECRET'),
+      expiresIn: ttl,
+      // this.configService.get<string>('JWT_EXPIRES_IN') as any,
+    });
+  }
 
-        const redisKey = `refresh_token:${payload.sub}`;
-        
-        await this.redis.set(
-            redisKey, refresh_token, 'EX', ttlRefresh
+  generateRefreshToken(payload: any, ttl: number): string {
+    payload.type = 'refresh';
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      expiresIn: ttl,
+      // this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') as any,
+    });
+  }
+
+  async refreshToken(
+    refresh_token: string,
+  ): Promise<{ access_token: string; refresh_token: string }> {
+    try {
+      // Verify refresh token
+      const payload = this.jwtService.verify(refresh_token, {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      });
+
+      if (payload.type !== 'refresh') {
+        throw new UnauthorizedException('Invalid type Access Token!');
+      }
+
+      const redisKey = `refresh_token:${payload.sub}`;
+      const storedToken = await this.redis.get(redisKey);
+      if (!storedToken || storedToken !== refresh_token) {
+        throw new UnauthorizedException(
+          'Refresh token invalid atau sudah pernah di pakai',
         );
+      }
 
-        const perms = user.role.permissions.map(p => p.slug)
-        await this.redis.set(`user_perms:${user.id}`, JSON.stringify(perms), 'EX', ttlRefresh);
+      const expiredKeyToken = this.configService.get<string>('JWT_EXPIRES_IN');
+      const ttlToken = Number(expiredKeyToken);
+      const expiredKeyRefresh = this.configService.get<string>(
+        'JWT_REFRESH_EXPIRES_IN',
+      );
+      const ttlRefresh = Number(expiredKeyRefresh);
 
-        // semua view
-        // const permissionArray = user.role.permissions.map(perm => ({
-        //     name : perm.name,
-        //     slug: perm.slug
-        // }));
-        const permissionArray = this.constructPermission(
-            user.role.permissions
-        );
+      // Generate new access token
+      const newPayload = {
+        sub: payload.sub,
+        email: payload.email,
+        role: payload.role,
+      };
 
-        return {
-            access_token,
-            refresh_token,
-            user: {
-                id: user.id,
-                email: user.email,
-                name: user.name,
-            },
-            role: user.role.name,
-            permission: permissionArray
-        }
+      const access_token = this.generateToken(newPayload, ttlToken);
+      const newRefreshToken = this.generateRefreshToken(newPayload, ttlRefresh);
+
+      await this.redis.set(redisKey, newRefreshToken, 'EX', ttlRefresh);
+
+      return {
+        access_token: access_token,
+        refresh_token: newRefreshToken,
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid refresh token');
     }
+  }
 
-    constructPermission(permissions: Permission[]) {
+  async logout(userId: string) {
+    const refreshTokenKey = `refresh_token:${userId}`;
+    const permsKey = `user_perms:${userId}`;
+    await Promise.all([
+      this.redis.del(refreshTokenKey),
+      this.redis.del(permsKey),
+    ]);
 
-        const accessibleModules : PermissionItem[] = [];
-
-        const slugsAdd = new Set<string>();
-        console.log('Iteater permission')
-        permissions.forEach(p=> {
-            console.log('Permission : ', p.name)
-            let permissionName = '';
-            let permissionSlug = '';
-            if (p.slug.endsWith('.view')) {
-                permissionName = p.name;
-                permissionSlug = p.slug;
-            } else { 
-                if (p.slug.endsWith('.*'))  {
-                    const moduleName = p.slug.split('.')[0]
-                    permissionSlug = `${moduleName}.view`;
-                    permissionName  = `View ${moduleName}`;
-                } 
-                if (p.slug==='*')  {
-                    const moduleName = p.slug.split('.')[0]
-                    permissionSlug = `${moduleName}.view`;
-                    permissionName  = `View ${moduleName}`;
-                } 
-            }
-            const hasSlug = slugsAdd.has(permissionSlug)
-            if (!hasSlug && permissionSlug !== '') {
-                accessibleModules.push({
-                    name: permissionName,
-                    slug: permissionSlug
-                })
-                slugsAdd.add(permissionSlug)
-            }
-        })
-
-        return accessibleModules;
-    }
-
-
-    generateToken(payload: any, ttl: number): string {
-        payload.type = 'access';
-        return this.jwtService.sign(
-            payload,{
-                secret: this.configService.get<string>('JWT_SECRET'),
-                expiresIn: ttl
-                // this.configService.get<string>('JWT_EXPIRES_IN') as any,
-            });
-
-    }
-
-    generateRefreshToken(payload: any, ttl: number): string {
-        payload.type = 'refresh';
-        return this.jwtService.sign(
-            payload, {
-                secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-                expiresIn: ttl
-                // this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') as any,
-            });
-    }
-
-    async refreshToken(refresh_token: string): Promise<{ access_token: string, refresh_token: string }> {
-        try {
-            // Verify refresh token
-            const payload = this.jwtService.verify(refresh_token, {
-                secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-            });
-
-            if (payload.type !== 'refresh') {
-                throw new UnauthorizedException('Invalid type Access Token!');
-            }
-
-            const redisKey = `refresh_token:${payload.sub}`;
-            const storedToken = await this.redis.get(redisKey);
-            if (!storedToken || storedToken !== refresh_token) {
-                throw new UnauthorizedException('Refresh token invalid atau sudah pernah di pakai')
-            }
-
-            const expiredKeyToken = this.configService.get<string>('JWT_EXPIRES_IN');
-            const ttlToken = Number(expiredKeyToken);
-            const expiredKeyRefresh = this.configService.get<string>('JWT_REFRESH_EXPIRES_IN');
-            const ttlRefresh = Number(expiredKeyRefresh);
-
-            // Generate new access token
-            const newPayload = {
-                sub: payload.sub,
-                email: payload.email,
-                role: payload.role,
-            };
-    
-            const access_token = this.generateToken(newPayload, ttlToken);
-            
-            // this.jwtService.sign(newPayload,{
-            //     secret: this.configService.get<string>('JWT_SECRET'),
-            //     expiresIn: this.configService.get<string>('JWT_EXPIRES_IN') as any,
-            //     });
-
-            const newRefreshToken = this.generateRefreshToken(newPayload, ttlRefresh)
-            
-            // this.jwtService.sign(newPayload, {
-            //     secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-            //     expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') as any
-            // })
-
-            await this.redis.set(redisKey, newRefreshToken, 'EX', ttlRefresh)
-    
-            return { 
-                access_token :access_token,
-                refresh_token : newRefreshToken,
-            };
-        } catch (error) {
-          throw new UnauthorizedException('Invalid refresh token');
-        }
-    }
-
-    async logout(userId: string) {
-
-        const refreshTokenKey = `refresh_token:${userId}`;     
-        const permsKey = `user_perms:${userId}`;   
-        await Promise.all([
-            this.redis.del(refreshTokenKey),
-            this.redis.del(permsKey)
-        ]);
-      
-        return {
-          statusCode: 200,
-          message: 'Logout berhasil, sesi telah dihapus.',
-        };
-    }
-
+    return {
+      statusCode: 200,
+      message: 'Logout berhasil, sesi telah dihapus.',
+    };
+  }
 }

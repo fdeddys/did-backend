@@ -1,14 +1,12 @@
-import { BaseEntity } from "../../common/base.entity";
-import { Column, Entity, OneToMany } from "typeorm";
-import { UtilDtl } from "./util-dtl.entity";
-
+import { BaseEntity } from '../../common/base.entity';
+import { Column, Entity, OneToMany } from 'typeorm';
+import { UtilDtl } from './util-dtl.entity';
 
 @Entity('util_hdr')
 export class UtilHdr extends BaseEntity {
+  @Column({ unique: true })
+  name: string;
 
-    @Column({ unique : true} )
-    name: string;
-
-    @OneToMany(()=> UtilDtl, (dtl) => dtl.hdr)
-    details: UtilDtl[];
+  @OneToMany(() => UtilDtl, (dtl) => dtl.hdr)
+  details: UtilDtl[];
 }

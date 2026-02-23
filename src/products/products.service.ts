@@ -7,42 +7,41 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class ProductsService {
-
   constructor(
     @InjectRepository(Product)
-    private productRepository: Repository<Product>
+    private productRepository: Repository<Product>,
   ) {}
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
-    const product = this.productRepository.create(createProductDto)
+    const product = this.productRepository.create(createProductDto);
     return await this.productRepository.save(product);
   }
 
   async findAll(): Promise<Product[]> {
     return await this.productRepository.find({
       select: {
-        id : true,
-        name: true,
-        price: true,
-        stock: true,
-        description: true,
-      }
-    });
-  }
-
-  async findOne(id: string): Promise<Product> {
-    const product = await this.productRepository.findOne({ 
-      select: {
-        id : true,
+        id: true,
         name: true,
         price: true,
         stock: true,
         description: true,
       },
-      where : {id} 
+    });
+  }
+
+  async findOne(id: string): Promise<Product> {
+    const product = await this.productRepository.findOne({
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        stock: true,
+        description: true,
+      },
+      where: { id },
     });
     if (!product) {
-      throw new NotFoundException(`Product with id ${id} not found`)
+      throw new NotFoundException(`Product with id ${id} not found`);
     }
     return product;
   }
