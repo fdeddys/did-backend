@@ -23,7 +23,6 @@ export class ProductsService {
         id: true,
         name: true,
         price: true,
-        stock: true,
         description: true,
       },
     });
@@ -35,7 +34,6 @@ export class ProductsService {
         id: true,
         name: true,
         price: true,
-        stock: true,
         description: true,
       },
       where: { id },

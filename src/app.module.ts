@@ -9,12 +9,10 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RedisModule } from './redis/redis.module';
 import { RoleModule } from './roles/roles.module';
-import { UtilityModule } from './utility/utility.module';
 import { CategoryModule } from './category/category.module';
 import { StockModule } from './stock/stock.module';
 import { UomModule } from './uom/uom.module';
 import { OrdersModule } from './order/order.module';
-import { OrderDetailsModule } from './order-detail/order-detail.module';
 import { SalesModule } from './sales/sales.module';
 import { BannerModule } from './banner/banner.module';
 import { MerchantModule } from './merchant/merchant.module';
@@ -37,12 +35,10 @@ import { CompanyModule } from './company/company.module';
     AuthModule,
     RedisModule,
     RoleModule,
-    UtilityModule,
     CategoryModule,
     StockModule,
     UomModule,
     OrdersModule,
-    OrderDetailsModule,
     SalesModule,
     BannerModule,
     MerchantModule,
