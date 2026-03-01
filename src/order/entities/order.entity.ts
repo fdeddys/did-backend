@@ -1,6 +1,6 @@
 import { BaseEntity } from '../../common/base.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
-import { OrderDetail } from './order-detail.entities';
+import { OrderDetail } from './order-detail.entity';
 
 @Entity('orders')
 export class Order extends BaseEntity {
@@ -22,8 +22,8 @@ export class Order extends BaseEntity {
   merchantId: string;
 
   @Column({ type: 'text' })
-  notes: Text;
+  notes: string;
 
-  @Column({ type: 'number' })
+  @Column({ type: 'integer' })
   totalQuantity: number;
 }

@@ -21,7 +21,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     environment:
-      - NODE_ENV=local
+      - NODE_ENV=dev
 
   # PostgreSQL Database (for development only)
   postgres:
@@ -53,7 +53,7 @@ services:
     platform: linux/amd64
     container_name: backend-redis-dev
     ports:
-      - "6379:6379"
+      - "6378:6379"
     networks:
       - app-network
     healthcheck:

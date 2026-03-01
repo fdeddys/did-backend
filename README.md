@@ -96,3 +96,46 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+
+## STEP BY STEP
+
+### ENV Docker
+Applikasi, redis dan psql di docker
+#### RUN 
+file  .env.dev  
+NODE_ENV=dev  
+DB_HOST=postgres  
+REDIS_HOST=host.docker.internal 
+
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d -build
+
+
+#### Migration
+
+file  .env.dev  
+DB_HOST=postgres  
+docker exec -it backend-app-dev npm run migration:run
+
+##
+
+### ENV Sandbox
+Applikasi di docker   
+Redis dan pqsl di local
+#### RUN 
+file  .env.sandbox  
+NODE_ENV=sandbox  
+DB_HOST=host.docker.internal  
+REDIS_HOST=host.docker.internal 
+
+docker compose -f docker-compose.yml -f docker-compose.sandbox.yml up
+
+
+#### Migration
+
+file  .env.sandbox  
+DB_HOST=localhost  
+NODE_ENV=sandbox npm run migration:generate src/database/migrations/InitDatabase
+NODE_ENV=sandbox npm run migration:run
+
+

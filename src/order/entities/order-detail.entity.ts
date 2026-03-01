@@ -1,7 +1,7 @@
 import { BaseEntity } from '../../common/base.entity';
 import { Column, Entity, JoinColumn, OneToMany } from 'typeorm';
-import { Order } from './order.entites';
-import { Stock } from 'src/stock/entities/stock.entity';
+import { Order } from './order.entity';
+import { Stock } from '../../stock/entities/stock.entity';
 
 @Entity('order-details')
 export class OrderDetail extends BaseEntity {
@@ -14,12 +14,12 @@ export class OrderDetail extends BaseEntity {
   @Column({ type: 'uuid', name: 'stock_id' })
   stock: Stock;
 
-  @Column({ type: 'number', default: 0 })
+  @Column({ type: 'integer', default: 0 })
   qtyOrder: number;
 
-  @Column({ type: 'number', default: 0 })
+  @Column({ type: 'integer', default: 0 })
   qtySent: number;
 
-  @Column({ type: 'number', default: 0 })
+  @Column({ type: 'integer', default: 0 })
   qtyReceived: number;
 }
