@@ -2,6 +2,6 @@ import { Module } from '@nestjs/common';
 import { UomService } from './uom.service';
 
 @Module({
-  providers: [UomService]
+  providers: [UomService],
 })
 export class UomModule {}

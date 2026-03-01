@@ -135,7 +135,7 @@ docker compose -f docker-compose.yml -f docker-compose.sandbox.yml up
 
 file  .env.sandbox  
 DB_HOST=localhost  
-NODE_ENV=sandbox npm run migration:generate src/database/migrations/InitDatabase
+NODE_ENV=sandbox npm run migration:generate src/database/migrations/CreateTable
 NODE_ENV=sandbox npm run migration:run
 
 
