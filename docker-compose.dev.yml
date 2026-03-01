@@ -12,6 +12,8 @@ services:
       - "3000:3000"
     env_file:
       - .env.dev
+    networks:
+      - app-network
     depends_on:
       postgres:
         condition: service_healthy
@@ -47,7 +49,8 @@ services:
   # --- SERVICE REDIS BARU ---
   redis:
     image: redis:alpine
-    platform: linux/arm64 # agar sesuai dg M1
+    # platform: linux/arm64 # agar sesuai dg M1
+    platform: linux/amd64
     container_name: backend-redis-dev
     ports:
       - "6379:6379"

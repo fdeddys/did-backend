@@ -18,6 +18,19 @@ services:
       - NODE_ENV=sandbox
     # No postgres service - connect to external database
     # Database config is in .env.sandbox
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: backend-redis-commander-sandbox
+    environment:
+      # Arahkan redis-commander ke Redis yang ada di laptop Anda
+      - REDIS_HOSTS=local:host.docker.internal:6379
+    ports:
+      - "8081:8081"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 # Note: No PostgreSQL service in sandbox
 # Sandbox connects to external managed database

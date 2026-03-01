@@ -1,5 +1,5 @@
 import { Stock } from '../../stock/entities/stock.entity';
-import { Category } from '../../category/entities/category';
+import { Category } from '../../category/entities/category.entity';
 import { BaseEntity } from '../../common/base.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
@@ -26,5 +26,5 @@ export class Product extends BaseEntity {
   @OneToMany(() => Stock, (stock) => stock.product, {
     eager: false,
   })
-  stocks: Stock;
+  stocks: Stock[];
 }

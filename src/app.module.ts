@@ -22,7 +22,11 @@ import { CompanyModule } from './company/company.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      // envFilePath: process.env.NODE_ENV
+      //   ? `.env.${process.env.NODE_ENV}`
+      //   : '.env',
+      //envFilePath: `.env.dev`,
+      // '.env',
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
